@@ -1,3 +1,7 @@
 # ninja log v6
-2	428	7619959954761586	CMakeFiles/Wav_File_Project.dir/main.cpp.obj	b99daf81c4b29593
-7	618	7619959954812034	CMakeFiles/Wav_File_Project.dir/Audio.cpp.obj	6a92ccbbb496ebb8
+5	655	7620912686291544	CMakeFiles/Wav_File_Project.dir/main.cpp.obj	b99daf81c4b29593
+650	747	7620904912753945	Wav_File_Project.exe	ba7ea8f3f9effbc4
+9	650	7620904906336905	CMakeFiles/Wav_File_Project.dir/Audio.cpp.obj	6a92ccbbb496ebb8
+2	224	7620912972497157	build.ninja	f7276a2427966cea
+2	216	7620912972497157	build.ninja	f7276a2427966cea
+5	101	7620912972742145	Wav_File_Project.exe	e8eba8fae0e1b3b8

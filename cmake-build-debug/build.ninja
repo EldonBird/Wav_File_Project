@@ -55,12 +55,6 @@ build CMakeFiles/Wav_File_Project.dir/main.cpp.obj: CXX_COMPILER__Wav_File_Proje
   OBJECT_DIR = CMakeFiles\Wav_File_Project.dir
   OBJECT_FILE_DIR = CMakeFiles\Wav_File_Project.dir
 
-build CMakeFiles/Wav_File_Project.dir/Audio.cpp.obj: CXX_COMPILER__Wav_File_Project_unscanned_Debug D$:/Projects/My$ software/Wav_File_Project/Audio.cpp || cmake_object_order_depends_target_Wav_File_Project
-  DEP_FILE = CMakeFiles\Wav_File_Project.dir\Audio.cpp.obj.d
-  FLAGS = -g -std=gnu++20 -fdiagnostics-color=always
-  OBJECT_DIR = CMakeFiles\Wav_File_Project.dir
-  OBJECT_FILE_DIR = CMakeFiles\Wav_File_Project.dir
-
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Wav_File_Project
@@ -69,7 +63,7 @@ build CMakeFiles/Wav_File_Project.dir/Audio.cpp.obj: CXX_COMPILER__Wav_File_Proj
 #############################################
 # Link the executable Wav_File_Project.exe
 
-build Wav_File_Project.exe: CXX_EXECUTABLE_LINKER__Wav_File_Project_Debug CMakeFiles/Wav_File_Project.dir/main.cpp.obj CMakeFiles/Wav_File_Project.dir/Audio.cpp.obj
+build Wav_File_Project.exe: CXX_EXECUTABLE_LINKER__Wav_File_Project_Debug CMakeFiles/Wav_File_Project.dir/main.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Wav_File_Project.dir

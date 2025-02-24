@@ -4,5 +4,4 @@ project(Wav_File_Project)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(Wav_File_Project main.cpp
-        Audio.cpp
-        cmake-build-debug/Audio.hpp)
+        main.hpp)
