@@ -2,10 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "Wav_File_Project.exe"
-		},
-		{
-			"path" : "Wav_File_Project.pdb"
+			"path" : "Wav_File_Project"
 		}
 	],
 	"backtrace" : 1,
@@ -68,16 +65,12 @@
 			{
 				"fragment" : "",
 				"role" : "flags"
-			},
-			{
-				"fragment" : "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32",
-				"role" : "libraries"
 			}
 		],
 		"language" : "CXX"
 	},
 	"name" : "Wav_File_Project",
-	"nameOnDisk" : "Wav_File_Project.exe",
+	"nameOnDisk" : "Wav_File_Project",
 	"paths" : 
 	{
 		"build" : ".",
