@@ -14,14 +14,13 @@
 
 struct wav_t {
 
-    char riff_header[5];
-    int wav_size;
-    char wave_header[5];
+    char chunk_id[5];
+    int chunk_size;
+    char format[5];
 
     char Subchunk1ID[5];
     char Subchunk2ID[5];
 
-    int ChunkSize;
     int Subchunk1Size;
     int SampleRate;
     int ByteRate;
@@ -44,6 +43,7 @@ using namespace std;
 bool read_in_wav_data(const char *filename, wav_t *sound);
 bool output_to_wav(const char *filename, wav_t *sound);
 bool double_sound(wav_t *sound);
+bool double_length(wav_t *sound);
 
 
 int main(){
@@ -51,10 +51,10 @@ int main(){
 
     wav_t *sound = new wav_t();
 
-    if (read_in_wav_data("coin.wav", sound)) {
+    if (read_in_wav_data("boom.wav", sound)) {
 
-        double_sound(sound);
-        output_to_wav("D:/Projects/My software/Wav_File_Project/output.wav", sound);
+        //double_length(sound);
+        output_to_wav("throughboom.wav", sound);
     }
 
     delete sound;
@@ -73,18 +73,18 @@ bool read_in_wav_data(const char *filename, wav_t *sound) {
     }
 
 
-    fread(sound->riff_header, sizeof(char), 4, fp);
-    std::cout << sound->riff_header << std::endl;
-    if (strncmp(sound->riff_header, "RIFF", 4) != 0) {
+    fread(sound->chunk_id, sizeof(char), 4, fp);
+    std::cout << sound->chunk_id << std::endl;
+    if (strncmp(sound->chunk_id, "RIFF", 4) != 0) {
         std::cerr << "Invalid RIFF header" << std::endl;
         return false;
     }
 
-    fread(&sound->wav_size, sizeof(int), 1, fp);
-    std::cout << sound->wav_size << std::endl;
-    fread(sound->wave_header, sizeof(char), 4, fp);
-    std::cout << sound->wave_header << std::endl;
-    if (strncmp(sound->wave_header, "WAVE", 4) != 0) {
+    fread(&sound->chunk_size, sizeof(int), 1, fp);
+    std::cout << sound->chunk_size << std::endl;
+    fread(sound->format, sizeof(char), 4, fp);
+    std::cout << sound->format << std::endl;
+    if (strncmp(sound->format, "WAVE", 4) != 0) {
         std::cerr << "Not a WAVE file!" << std::endl;
         return false;
     }
@@ -103,13 +103,13 @@ bool read_in_wav_data(const char *filename, wav_t *sound) {
     fread(&sound->BlockAlign, sizeof(short), 1, fp);
     fread(&sound->BitsPerSample, sizeof(short), 1, fp);
 
-    std::cout << sound->Subchunk1Size<< std::endl;
-    std::cout << sound->AudioFormat << std::endl;
-    std::cout << sound->NumChannels << std::endl;
-    std::cout << sound->SampleRate << std::endl;
-    std::cout << sound->ByteRate << std::endl;
-    std::cout << sound->BlockAlign << std::endl;
-    std::cout << sound->BitsPerSample << std::endl;
+    std::cout << "subchunk1size : " << sound->Subchunk1Size<< std::endl;
+    std::cout << "format : " << sound->AudioFormat << std::endl;
+    std::cout << "channels : " << sound->NumChannels << std::endl;
+    std::cout << "Sample rate : " << sound->SampleRate << std::endl;
+    std::cout << "Byte rate : " << sound->ByteRate << std::endl;
+    std::cout << "Block align : " << sound->BlockAlign << std::endl;
+    std::cout << "bits per sample : " << sound->BitsPerSample << std::endl;
 
     fread(sound->Subchunk2ID, sizeof(char), 4, fp);
     if (strncmp(sound->Subchunk2ID, "data", 4) != 0 ) {
@@ -131,62 +131,6 @@ bool read_in_wav_data(const char *filename, wav_t *sound) {
     return true;
 }
 
-/* bool read_in_wav_data(const char *filename, sound_t *sound) {
-
-    ifstream file(filename, ios::binary);
-
-    if (!file.is_open()) {
-        std::cerr << "Could not open file " << filename << std::endl;
-        return false;
-    }
-
-    wav_t header;
-
-    if (!file.read(reinterpret_cast<char*>(&header), sizeof(wav_t))) {
-        std::cerr << "Could not read header properly";
-        return false;
-    }
-
-    std::cout << "\n riff: " << header.riff_header << "\n wav: " << header.wave_header << "\n fmt: " << header.fmt_header << "\n audio format: " << header.audio_format << "\n channels: " << header.num_channels << "\n sample rate: " << header.sample_rate << std::endl;
-
-    if (strncmp(header.riff_header, "RIFF") ||
-        strncmp(header.wave_header, "WAVE") ||
-        strncmp(header.fmt_header, "fmt ") ||
-        header.audio_format != 1) {
-
-        std::cerr << "Invalid wav file format" << std::endl;
-        return false;
-    }
-
-    sound->sample_rate = header.sample_rate;
-    sound->num_channels = header.num_channels;
-    sound->bits_per_sample = header.bits_per_sample;
-
-    std::cout << "Got here";
-
-
-    char chunk_id[4];
-    uint32_t chunk_size;
-
-    while (file.read(chunk_id, 4)) {
-        file.read(reinterpret_cast<char*>(&chunk_size), 4);
-
-        if (std::string(chunk_id, 4) == "data") {
-            break;
-        }
-
-        file.seekg(chunk_size, std::ios::cur);
-    }
-
-    size_t num_samples = chunk_size / (header.bits_per_sample / 8);
-    sound->samples.resize(num_samples);
-
-    file.read(reinterpret_cast<char*>(sound->samples.data()), chunk_size);
-
-    return true;
-} */
-
-
 bool output_to_wav(const char *filename, wav_t *sound) {
 
     FILE *file = fopen(filename, "wb");
@@ -197,9 +141,9 @@ bool output_to_wav(const char *filename, wav_t *sound) {
     }
 
 
-    fwrite(sound->riff_header, sizeof(char), 4, file);
-    fwrite(&sound->wav_size, sizeof(int), 1, file);
-    fwrite(sound->wave_header, sizeof(char), 4, file);
+    fwrite(sound->chunk_id, sizeof(char), 4, file);
+    fwrite(&sound->chunk_size, sizeof(int), 1, file);
+    fwrite(sound->format, sizeof(char), 4, file);
 
     fwrite(sound->Subchunk1ID, sizeof(char), 4, file);
     fwrite(&sound->Subchunk1Size, sizeof(int), 1, file);
@@ -238,14 +182,34 @@ bool double_sound(wav_t *sound) {
 
     sound->data = new_data;
     sound->Subchunk2Size = sound->data.size() * sound->NumChannels * (sound->BitsPerSample / 8);
-    sound->wav_size = 36 + sound->Subchunk2Size;
+    sound->chunk_size = 36 + sound->Subchunk2Size;
 
     return true;
 
-
-
 }
 
+bool double_length(wav_t *sound) {
+
+    std::vector<std::pair<short, short>> originals = sound->data;
+    int original_size = sound->data.size();
+
+    std::vector<std::pair<short, short>> new_data(original_size * 2);
+
+    int current = 0;
+
+    for (int i = 0; i < original_size; i++) {
+
+        new_data[i] = originals[i * 2];
+
+
+    }
+    sound->data = new_data;
+    sound->Subchunk2Size = sound->data.size() * sound->NumChannels * (sound->BitsPerSample / 8);
+    sound->chunk_size = 36 + sound->Subchunk2Size;
+
+    return true;
+
+}
 
 
 
