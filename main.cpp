@@ -12,7 +12,7 @@
 
 
 
-struct wav_header {
+struct wav_t {
 
     char riff_header[5];
     int wav_size;
@@ -32,46 +32,40 @@ struct wav_header {
     short BlockAlign;
     short BitsPerSample;
 
-    // utility
+
     unsigned NumSamples;
 
     std::vector<std::pair<short, short> > data;
 };
 
-struct sound_t{
-    std::vector<int16_t> samples;
-    uint32_t sample_rate;
-    uint16_t num_channels;
-    uint16_t bits_per_sample;
-};
-
 using namespace std;
 
 
-bool read_in_wav_data(const char *filename, sound_t *sound);
-bool output_to_wav(const char *filename, sound_t *sound);
+bool read_in_wav_data(const char *filename, wav_t *sound);
+bool output_to_wav(const char *filename, wav_t *sound);
+bool double_sound(wav_t *sound);
 
-// TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+
 int main(){
 
 
-    sound_t *sound = new sound_t();
+    wav_t *sound = new wav_t();
 
-    if (read_in_wav_data("test.wav", sound)) {
-        output_to_wav("output.wav", sound);
+    if (read_in_wav_data("coin.wav", sound)) {
+
+        double_sound(sound);
+        output_to_wav("D:/Projects/My software/Wav_File_Project/output.wav", sound);
     }
 
     delete sound;
-    return 1;
+    return 0;
 }
 
 
-bool read_in_wav_data(const char *filename, sound_t *sound) {
+bool read_in_wav_data(const char *filename, wav_t *sound) {
 
     FILE *fp = fopen(filename, "rb");
 
-    wav_header *header = new wav_header;
 
     if (!fp) {
         std::cerr << "Error opening file " << filename << std::endl;
@@ -79,47 +73,58 @@ bool read_in_wav_data(const char *filename, sound_t *sound) {
     }
 
 
-    fread(header->riff_header, sizeof(char), 4, fp);
-    if (strncmp(header->riff_header, "RIFF", 4) != 0) {
-        throw std::runtime_error("Not a RIFF file!");
+    fread(sound->riff_header, sizeof(char), 4, fp);
+    std::cout << sound->riff_header << std::endl;
+    if (strncmp(sound->riff_header, "RIFF", 4) != 0) {
+        std::cerr << "Invalid RIFF header" << std::endl;
         return false;
     }
 
-    fread(&header->wav_size, sizeof(int), 1, fp);
-    fread(header->wave_header, sizeof(char), 4, fp);
-    if (strncmp(header->wave_header, "WAVE", 4) != 0) {
+    fread(&sound->wav_size, sizeof(int), 1, fp);
+    std::cout << sound->wav_size << std::endl;
+    fread(sound->wave_header, sizeof(char), 4, fp);
+    std::cout << sound->wave_header << std::endl;
+    if (strncmp(sound->wave_header, "WAVE", 4) != 0) {
         std::cerr << "Not a WAVE file!" << std::endl;
         return false;
     }
 
-    fread(header->Subchunk1ID, sizeof(char), 4, fp);
-    if (strncmp(header->Subchunk1ID, "fmt ", 4) != 0) {
+    fread(sound->Subchunk1ID, sizeof(char), 4, fp);
+    if (strncmp(sound->Subchunk1ID, "fmt ", 4) != 0) {
         std::cerr << "Not the right fmt header" << std::endl;
         return false;
     }
 
-    fread(&header->Subchunk1Size, sizeof(int), 1, fp);
-    fread(&header->AudioFormat, sizeof(short), 1, fp);
-    fread(&header->NumChannels, sizeof(short), 1, fp);
-    fread(&header->SampleRate, sizeof(int), 1, fp);
-    fread(&header->ByteRate, sizeof(int), 1, fp);
-    fread(&header->BlockAlign, sizeof(short), 1, fp);
-    fread(&header->BitsPerSample, sizeof(short), 1, fp);
+    fread(&sound->Subchunk1Size, sizeof(int), 1, fp);
+    fread(&sound->AudioFormat, sizeof(short), 1, fp);
+    fread(&sound->NumChannels, sizeof(short), 1, fp);
+    fread(&sound->SampleRate, sizeof(int), 1, fp);
+    fread(&sound->ByteRate, sizeof(int), 1, fp);
+    fread(&sound->BlockAlign, sizeof(short), 1, fp);
+    fread(&sound->BitsPerSample, sizeof(short), 1, fp);
 
-    fread(header->Subchunk2ID, sizeof(char), 4, fp);
-    if (strncmp(header->Subchunk2ID, "data", 4) ==0 ) {
-        std::cerr << "Not a data file" << std::endl;
+    std::cout << sound->Subchunk1Size<< std::endl;
+    std::cout << sound->AudioFormat << std::endl;
+    std::cout << sound->NumChannels << std::endl;
+    std::cout << sound->SampleRate << std::endl;
+    std::cout << sound->ByteRate << std::endl;
+    std::cout << sound->BlockAlign << std::endl;
+    std::cout << sound->BitsPerSample << std::endl;
+
+    fread(sound->Subchunk2ID, sizeof(char), 4, fp);
+    if (strncmp(sound->Subchunk2ID, "data", 4) != 0 ) {
+        std::cerr << "Something wrong with the 'data' " << std::endl;
         return false;
     }
 
-    fread(&header->Subchunk2Size, sizeof(int), 1, fp);
+    fread(&sound->Subchunk2Size, sizeof(int), 1, fp);
 
-    int NumSamples = header->Subchunk2Size / (header->NumChannels*(header->BitsPerSample / 8));
+    int NumSamples = sound->Subchunk2Size / (sound->NumChannels*(sound->BitsPerSample / 8));
 
-    header->data = std::vector<std::pair<short, short> >(NumSamples);
+    sound->data = std::vector<std::pair<short, short> >(NumSamples);
     for (int i = 0; i < NumSamples; i++) {
-        fread(&header->data[i].first, sizeof(short), 1, fp);
-        fread(&header->data[i].second, sizeof(short), 1, fp);
+        fread(&sound->data[i].first, sizeof(short), 1, fp);
+        fread(&sound->data[i].second, sizeof(short), 1, fp);
     }
 
     fclose(fp);
@@ -135,9 +140,9 @@ bool read_in_wav_data(const char *filename, sound_t *sound) {
         return false;
     }
 
-    wav_header header;
+    wav_t header;
 
-    if (!file.read(reinterpret_cast<char*>(&header), sizeof(wav_header))) {
+    if (!file.read(reinterpret_cast<char*>(&header), sizeof(wav_t))) {
         std::cerr << "Could not read header properly";
         return false;
     }
@@ -182,45 +187,67 @@ bool read_in_wav_data(const char *filename, sound_t *sound) {
 } */
 
 
-bool output_to_wav(const char *filename, sound_t *sound) {
+bool output_to_wav(const char *filename, wav_t *sound) {
 
+    FILE *file = fopen(filename, "wb");
 
-    std::ofstream file(filename, ios::binary);
-    if (!file.is_open()) {
-        std::cerr << "Could not open file " << filename << std::endl;
+    if (!file) {
+        std::cout << "failed to open file" << std::endl;
         return false;
     }
 
 
-    uint32_t data_size = sound->samples.size() * sizeof(int16_t);
-    uint32_t wav_size = 16 + data_size;
+    fwrite(sound->riff_header, sizeof(char), 4, file);
+    fwrite(&sound->wav_size, sizeof(int), 1, file);
+    fwrite(sound->wave_header, sizeof(char), 4, file);
 
-    file.write("RIFF", 4);
-    file.write(reinterpret_cast<char*>(&wav_size), 4);
-    file.write("WAVE", 4);
+    fwrite(sound->Subchunk1ID, sizeof(char), 4, file);
+    fwrite(&sound->Subchunk1Size, sizeof(int), 1, file);
+    fwrite(&sound->AudioFormat, sizeof(short), 1, file);
+    fwrite(&sound->NumChannels, sizeof(short), 1, file);
+    fwrite(&sound->SampleRate, sizeof(int), 1, file);
+    fwrite(&sound->ByteRate, sizeof(int), 1, file);
+    fwrite(&sound->BlockAlign, sizeof(short), 1, file);
+    fwrite(&sound->BitsPerSample, sizeof(short), 1, file);
 
-    file.write("fmt ", 4);
+    fwrite(sound->Subchunk2ID, sizeof(char), 4, file);
+    fwrite(&sound->Subchunk2Size, sizeof(int), 1, file);
 
-    uint32_t fmt_chunk_size = 16;
-    uint16_t format = 1;
-    uint32_t byte_per_sample = sound->sample_rate * sound->num_channels * (sound->bits_per_sample / 8);
-    uint16_t block_align = sound->num_channels * (sound->bits_per_sample / 8);
+    for (int i = 0; i < sound->data.size(); i++) {
+        fwrite(&sound->data[i].first, sizeof(short), 1, file);
+        fwrite(&sound->data[i].second, sizeof(short), 1, file);
+    }
 
-    file.write(reinterpret_cast<char*>(&fmt_chunk_size), 4);
-    file.write(reinterpret_cast<char*>(&format), 2);
-    file.write(reinterpret_cast<char*>(&sound->num_channels), 2);
-    file.write(reinterpret_cast<char*>(&sound->sample_rate), 4);
-    file.write(reinterpret_cast<char*>(&byte_per_sample), 4);
-    file.write(reinterpret_cast<char*>(&block_align), 2);
-    file.write(reinterpret_cast<char*>(&sound->bits_per_sample), 2);
+    fclose(file);
 
-    file.write("data", 4);
-    file.write(reinterpret_cast<char*>(&data_size), 4);
-
-    file.write(reinterpret_cast<char*>(sound->samples.data()), data_size);
+    std::cout << "Wrote file " << filename << std::endl;
 
     return true;
 }
+
+bool double_sound(wav_t *sound) {
+
+    std::vector<std::pair<short, short>> originals = sound->data;
+    int origional_size = originals.size();
+
+    std::vector<std::pair<short, short>> new_data(origional_size / 2);
+
+    for (int i = 0; i < origional_size / 2; i++) {
+        new_data[i] = originals[i * 2];
+    }
+
+    sound->data = new_data;
+    sound->Subchunk2Size = sound->data.size() * sound->NumChannels * (sound->BitsPerSample / 8);
+    sound->wav_size = 36 + sound->Subchunk2Size;
+
+    return true;
+
+
+
+}
+
+
+
 
 // TIP See CLion help at <a
 // href="https://www.jetbrains.com/help/clion/">jetbrains.com/help/clion/</a>.
