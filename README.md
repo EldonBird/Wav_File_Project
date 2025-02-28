@@ -2,7 +2,7 @@
 
 This was a project that worked in audio formats and was created in C++.
 
-[Video](www.youtube.com/watch?v=EC3dCndCjQU)
+[Video](https://www.youtube.com/watch?v=EC3dCndCjQU)
 ---
 # Development Environment
 
